@@ -25,6 +25,7 @@ function App() {
   const [search, setSearch] = useState({ url: RANDOM_MOVIES_URL });
   const hasCheckedFirstLoginRef = useRef(false);
   const [isAuthReady, setIsAuthReady] = useState(!storedUsername);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const resetSearch = useCallback(() => {
     setSearch({ url: RANDOM_MOVIES_URL });
@@ -123,6 +124,8 @@ function App() {
           restoreMovieIdsSearch={RestoreMovieIdsSearch}
           moviesSeenSearch={MoviesSeenSearch}
           moviesWantToWatchSearch={MoviesWantToWatchSearch}
+          collapsed={sidebarCollapsed}
+          onCollapse={setSidebarCollapsed}
         />
         <Layout.Content style={{ height: "100%", overflowY: "auto", paddingRight: "10px" }}>
           <Switch>
@@ -136,7 +139,13 @@ function App() {
               <BatchInsertPage />
             </Route>
             <Route path="/">
-              <Browse search={search} userData={userData} setUserData={setUserData} isAuthReady={isAuthReady} />
+              <Browse 
+                search={search} 
+                userData={userData} 
+                setUserData={setUserData} 
+                isAuthReady={isAuthReady}
+                sidebarCollapsed={sidebarCollapsed}
+              />
             </Route>
           </Switch>
         </Layout.Content>

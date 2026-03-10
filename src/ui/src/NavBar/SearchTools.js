@@ -50,7 +50,9 @@ const searchLetters = [
   "Z",
 ];
 
-const listStyle = {};
+const listStyle = {
+  paddingBottom: "20px",
+};
 
 function SearchTools({ search }) {
   const history = useHistory();
@@ -142,7 +144,7 @@ function SearchTools({ search }) {
               return (
                 <List.Item
                   style={{
-                    marginBottom: "10px",
+                    marginBottom: "8px",
                   }}
                 >
                   <Button
@@ -150,9 +152,9 @@ function SearchTools({ search }) {
                       ToggleLetterSearch(item);
                     }}
                     style={{
-                      width: "36px",
-                      // removed backgroundColor change on selection since it was too similar to the hover color and made it hard to see which letter was selected, replaced with a blue background and white text for better visibility
-                      //  backgroundColor: item === search.startsWith ? "silver" : "white",
+                      width: "32px",
+                      height: "32px",
+                      padding: "0",
                       backgroundColor: item === search.startsWith ? "#1890ff" : "white",
                       color: item === search.startsWith ? "white" : "black",
                       borderColor: item === search.startsWith ? "#1890ff" : "#d9d9d9",

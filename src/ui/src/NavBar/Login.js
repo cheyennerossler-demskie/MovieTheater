@@ -109,7 +109,7 @@ function Login({ userData, setUserData, onUserLoggedIn }) {
         onSelect={onSelect}
         onSearch={handleSearch}
       >
-        <div>
+        <div style={{ display: "flex", gap: "0", alignItems: "stretch" }}>
           <Input
             placeholder="Username"
             prefix={<UserOutlined className="site-form-item-icon" />}
@@ -170,7 +170,7 @@ function Login({ userData, setUserData, onUserLoggedIn }) {
           </a>
         </div>
         <br style={{ clear: "both" }} />
-        <a onClick={logoutUser}>{"Logout"}</a>
+        <a onClick={logoutUser} className="logout-link">{"Logout"}</a>
         <br />
       </div>
     );

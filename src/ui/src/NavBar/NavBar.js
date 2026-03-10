@@ -17,6 +17,8 @@ function NavBar({
   restoreMovieIdsSearch,
   moviesSeenSearch,
   moviesWantToWatchSearch,
+  collapsed,
+  onCollapse,
 }) {
   const history = useHistory();
   const location = useLocation();
@@ -112,10 +114,22 @@ function NavBar({
   }, [location.search, userData?.username, resetSearch, titleSearch, actorSearch, firstLetterSearch, restoreMovieIdsSearch, moviesSeenSearch, moviesWantToWatchSearch]);
 
   return (
-    <Layout.Sider>
-      <Login userData={userData} setUserData={setUserData} onUserLoggedIn={onUserLoggedIn} />
-      <br />
-      <SearchTools search={search} />
+    <Layout.Sider 
+      className="app-sider"
+      collapsible 
+      collapsed={collapsed} 
+      onCollapse={onCollapse}
+      width={200}
+      collapsedWidth={80}
+      style={{ overflowY: "auto", height: "100vh" }}
+    >
+      {!collapsed && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
+          <Login userData={userData} setUserData={setUserData} onUserLoggedIn={onUserLoggedIn} />
+          <br />
+          <SearchTools search={search} />
+        </div>
+      )}
     </Layout.Sider>
   );
 }

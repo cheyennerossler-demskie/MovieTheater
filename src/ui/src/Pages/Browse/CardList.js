@@ -2,8 +2,18 @@ import { MovieAPI } from "../../MovieAPI";
 import { Card, List } from "antd";
 import { useState, useEffect } from "react";
 
-function getColumnCount() {
+function getColumnCount(sidebarCollapsed) {
   const w = window.innerWidth;
+  // When sidebar is collapsed, we have more space - be more aggressive with columns
+  if (sidebarCollapsed) {
+    if (w >= 1800) return 5;
+    if (w >= 1400) return 4;
+    if (w >= 1000) return 3;
+    if (w >= 768) return 2;
+    return 1;
+  }
+  // Normal sidebar visible
+  if (w >= 2000) return 5;
   if (w >= 1600) return 4;
   if (w >= 1200) return 3;
   if (w >= 768) return 2;
@@ -19,7 +29,7 @@ const listStyle = {
 const cardPosterStyle = {
   height: "100%",
   width: "100%",
-  objectFit: "cover",
+  objectFit: "contain",
 };
 
 const cardTitleStyle = {
@@ -30,6 +40,12 @@ const cardTitleStyle = {
   textAlign: "left",
   float: "left",
   paddingLeft: "5px",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  display: "-webkit-box",
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: "vertical",
+  lineHeight: "1.3",
 };
 
 const cardRatingStyle = {
@@ -71,6 +87,7 @@ const baseCardBodyStyle = {
   padding: "0px",
   display: "flex",
   userSelect: "none",
+  overflow: "hidden",
 };
 
 const baseCardContentWrapper = {
@@ -149,12 +166,12 @@ function UserMovieOptions({ userData, id, setUserData, onToggleViewing }) {
     if (isWatched) {
       watchedDataContainer = {
         ...hasWatchedDataContainer,
-        color: "#4169e3",
+        color: "#22c55e",
       };
     } else {
       watchedDataContainer = {
         ...hasWatchedDataContainer,
-        color: hoveredSeenButton ? "#52c41a" : "#a9a9a9", // Change color on hover of seen button
+        color: hoveredSeenButton ? "#1890ff" : "#a9a9a9", // Change color on hover of seen button
       };
     }
 
@@ -168,7 +185,7 @@ function UserMovieOptions({ userData, id, setUserData, onToggleViewing }) {
     } else {
       wantedDataContainer = {
         ...toWatchDataContainer,
-        color: hoveredWantButton ? "#52c41a" : "#a9a9a9", // Change color on hover of want button
+        color: hoveredWantButton ? "#1890ff" : "#a9a9a9", // Change color on hover of want button
       };
     }
     return (
@@ -207,7 +224,6 @@ function UserMovieOptions({ userData, id, setUserData, onToggleViewing }) {
             className="zoom-on-hover"
             style={watchedDataContainer}
           >
-            <span style={filmIcon} className="fas fa-film"></span>
             <span style={buttonLabelStyle}>SEEN</span>
           </div>
           <div
@@ -242,7 +258,6 @@ function UserMovieOptions({ userData, id, setUserData, onToggleViewing }) {
             className="zoom-on-hover"
             style={wantedDataContainer}
           >
-            <span style={heartIcon} className="fas fa-heart"></span>
             <span style={buttonLabelStyle}>WANT</span>
           </div>
         </div>
@@ -252,7 +267,7 @@ function UserMovieOptions({ userData, id, setUserData, onToggleViewing }) {
   return <></>;
 }
 
-function CardList({ movieDataArray, userData, setUserData, actorSearch, onMovieClick, onToggleViewing }) {
+function CardList({ movieDataArray, userData, setUserData, actorSearch, onMovieClick, onToggleViewing, sidebarCollapsed }) {
 const cardBodyStyle = userData
   ? { ...baseCardBodyStyle, height: "260px", flexWrap: "wrap" }
   : baseCardBodyStyle;
@@ -260,24 +275,38 @@ const cardContentWrapper = userData
   ? { ...baseCardContentWrapper, height: "85%" }
   : baseCardContentWrapper;
 
-const [columns, setColumns] = useState(getColumnCount);
+const [columns, setColumns] = useState(() => getColumnCount(sidebarCollapsed));
 const [hoveredMovieId, setHoveredMovieId] = useState(null);
 const [hoveredActor, setHoveredActor] = useState(null);
 
 useEffect(() => {
   function handleResize() {
-    setColumns(getColumnCount());
+    setColumns(getColumnCount(sidebarCollapsed));
   }
   window.addEventListener("resize", handleResize);
   return () => window.removeEventListener("resize", handleResize);
-}, []);
+}, [sidebarCollapsed]);
+
+// Update columns when sidebar collapses/expands
+useEffect(() => {
+  setColumns(getColumnCount(sidebarCollapsed));
+}, [sidebarCollapsed]);
 
   return (
     <>
       {
         <List
           style={listStyle}
-          grid={{ gutter: 8, column: columns }}
+          grid={{ 
+            gutter: 8, 
+            column: columns,
+            xs: columns,
+            sm: columns,
+            md: columns,
+            lg: columns,
+            xl: columns,
+            xxl: columns
+          }}
           dataSource={movieDataArray}
           renderItem={(item, i) => {
             const thumbUrl = MovieAPI.getPosterThumbnail(item.id);
@@ -306,7 +335,7 @@ useEffect(() => {
 
             return (
               <List.Item>
-                <Card hoverable bodyStyle={cardBodyStyle}>
+                <Card hoverable bodyStyle={cardBodyStyle} style={{ overflow: "hidden" }}>
                   <div style={cardContentWrapper}>
                     <div style={posterContainer}>
                       <img className="moviePosterImage" style={cardPosterStyle} alt="" src={thumbUrl} loading="lazy" />

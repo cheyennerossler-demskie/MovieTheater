@@ -2,10 +2,14 @@ import { useEffect, useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import CardList from "./CardList";
 import MovieModal from "./MovieModal";
+import MobileCardList from "./MobileCardList";
+import MobileMovieModal from "./MobileMovieModal";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
-function Browse({ search, userData, setUserData, isAuthReady }) {
+function Browse({ search, userData, setUserData, isAuthReady, sidebarCollapsed }) {
   const [movieDataArray, setMovieDataArray] = useState([]);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!isAuthReady) return;
@@ -94,10 +98,18 @@ function Browse({ search, userData, setUserData, isAuthReady }) {
   }, [search]);
 
   // Called by CardList / MovieModal when a movie's viewing state is toggled.
-  // Removes deselected movies from the displayed list immediately without navigation/refresh.
+  // Removes deselected movies from the displayed list only when viewing that specific filtered list.
   const handleToggleViewing = (movieId, action, isActive) => {
-    if (!isActive) {
-      setMovieDataArray((prev) => prev.filter((m) => m.id !== movieId));
+    if (!isActive && userData && search.movieIds) {
+      // Only remove from display if we're viewing the specific list being toggled
+      const isViewingSeenList = action === "SetWatched" && 
+        search.movieIds.every(id => userData.moviesSeen.includes(id));
+      const isViewingWantList = action === "SetWantToWatch" && 
+        search.movieIds.every(id => userData.moviesToWatch.includes(id));
+
+      if (isViewingSeenList || isViewingWantList) {
+        setMovieDataArray((prev) => prev.filter((m) => m.id !== movieId));
+      }
     }
   };
 
@@ -107,24 +119,49 @@ function Browse({ search, userData, setUserData, isAuthReady }) {
 
   return (
     <>
-      <CardList
-        movieDataArray={displayMovies}
-        userData={userData}
-        setUserData={setUserData}
-        actorSearch={handleActorSearch}
-        onMovieClick={handleOpenMovie}
-        onToggleViewing={handleToggleViewing}
-      />
-      <MovieModal
-        movieId={selectedMovieId}
-        open={isModalVisible}
-        onClose={handleCloseModal}
-        actorSearch={handleActorSearch}
-        movieDataArray={displayMovies}
-        userData={userData}
-        setUserData={setUserData}
-        onToggleViewing={handleToggleViewing}
-      />
+      {isMobile ? (
+        <>
+          <MobileCardList
+            movieDataArray={displayMovies}
+            userData={userData}
+            setUserData={setUserData}
+            onMovieClick={handleOpenMovie}
+            onToggleViewing={handleToggleViewing}
+            sidebarCollapsed={sidebarCollapsed}
+          />
+          <MobileMovieModal
+            movieId={selectedMovieId}
+            open={isModalVisible}
+            onClose={handleCloseModal}
+            actorSearch={handleActorSearch}
+            userData={userData}
+            setUserData={setUserData}
+            onToggleViewing={handleToggleViewing}
+          />
+        </>
+      ) : (
+        <>
+          <CardList
+            movieDataArray={displayMovies}
+            userData={userData}
+            setUserData={setUserData}
+            actorSearch={handleActorSearch}
+            onMovieClick={handleOpenMovie}
+            onToggleViewing={handleToggleViewing}
+            sidebarCollapsed={sidebarCollapsed}
+          />
+          <MovieModal
+            movieId={selectedMovieId}
+            open={isModalVisible}
+            onClose={handleCloseModal}
+            actorSearch={handleActorSearch}
+            movieDataArray={displayMovies}
+            userData={userData}
+            setUserData={setUserData}
+            onToggleViewing={handleToggleViewing}
+          />
+        </>
+      )}
     </>
   );
 }
